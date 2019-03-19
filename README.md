@@ -11,7 +11,7 @@ Simply run **make** to compile the executable called 'server'
 Run **make clean** to clear object files and the executable
 
 
-### License
+## License
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
