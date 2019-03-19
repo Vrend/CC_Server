@@ -1,3 +1,5 @@
+# Copyright (C) 2019 John Broderick
+#
 # This file is part of CC_Server.
 #
 # CC_Server is free software: you can redistribute it and/or modify
