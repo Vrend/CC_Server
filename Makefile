@@ -10,11 +10,11 @@ OBJ = server.o local_functions.o
 
 all: $(TARGET)
 
-%o: %c $(DEPS)
+%o: %cpp $(DEPS)
 		$(CC) -c $(CFLAGS) -o $@ $<
 
 $(TARGET): $(OBJ)
-				$(CC) $(CFLAGS) -o $@ $^
+		$(CC) $(CFLAGS) -o $@ $^
 
 clean:
-				$(RM) $(TARGET) *.o
+		$(RM) $(TARGET) *.o
