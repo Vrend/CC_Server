@@ -41,7 +41,7 @@ bool valid_params(const char* ip, char* port) {
 
 //Prints usage
 void print_usage() {
-		cout << "USAGE: ./server [REMOTE_IP] [PORT] [INPUT TYPE]" << endl;
+		cout << "USAGE: ./server [REMOTE_IP] [PORT] [INPUT TYPE]\n" << endl;
 }
 
 //Split user input into the options called tokens
@@ -69,4 +69,8 @@ bool check_command(string command) {
 		}
 	}
 	return false;
+}
+
+void print_license() {
+	cout <<  "\nCC_Server version " << VERSION << ", Copyright (C) 2019 John Broderick\nCC_Server comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it under certain conditions.\nFor more information, see the LICENSE file and the README.\n" << endl;
 }

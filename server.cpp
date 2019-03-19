@@ -34,6 +34,9 @@ client clients[MAX_CLIENTS];
 **/
 int main(int argc, char** argv) {
 	//Requires 4 arguments
+
+	print_license();
+
 	if(argc != 4) {
 		print_usage();
 		return 1;

@@ -30,4 +30,6 @@ void print_usage();
 
 bool check_command(string command);
 
+void print_license();
+
 // Functions end
