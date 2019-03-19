@@ -22,9 +22,9 @@ CC = g++
 
 CFLAGS = -g -Wall -pthread
 
-DEPS = server.h local_functions.h dependencies.h structs.h constants.h
+DEPS = server.h local_functions.h dependencies.h structs.h constants.h command_functions.h
 
-OBJ = server.o local_functions.o
+OBJ = server.o local_functions.o command_functions.o
 
 all: $(TARGET)
 

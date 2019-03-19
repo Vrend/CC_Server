@@ -33,10 +33,10 @@ client clients[MAX_CLIENTS];
 ** server thread which waits for connections, and creates a client thread
 **/
 int main(int argc, char** argv) {
-	//Requires 4 arguments
 
 	print_license();
 
+	//Requires 4 arguments
 	if(argc != 4) {
 		print_usage();
 		return 1;
@@ -102,7 +102,7 @@ void* initialize_client_handler(void* arg) {
 	free(arg);
 	sia = NULL;
 
-	printf("Starting Server on Port %s With ip %s \n", port, remote_ip);
+	cout << "Starting Server on Port " << port << "With ip " << remote_ip << endl;
 
 	//Generally address struct and size
 	struct sockaddr_in address;
@@ -174,8 +174,6 @@ void* initialize_client_handler(void* arg) {
 			ca->client_fd = new_client;
 			ca->client_read = p[0];
 
-			//critical section
-			pthread_mutex_lock(&lock);
 			//create client thread
 			int res = pthread_create(&(clients[num_clients].client), NULL, handle_client, (void*) ca);
 			if(res < 0) {
@@ -222,15 +220,16 @@ void* initialize_terminal(void* arg) {
 
 //TODO: Send command via pipe to command handler
 void run_command(string command, string* command_args) {
-	if(command.compare("exit") == 0) {
-		pthread_exit(0);
-	}
 	pthread_mutex_lock(&lock);
 	for(int i = 0; i < num_clients; i++) {
 			//for each client thread, send it the command via its write pipe
 			write(clients[i].client_write, command_args, sizeof(command_args));
 	}
 	pthread_mutex_unlock(&lock);
+
+	if(command.compare("exit") == 0) {
+		pthread_exit(0);
+	}
 }
 
 //Client thread runs this
@@ -248,14 +247,29 @@ void* handle_client(void* arg) {
 			cout << "Client pipe read error" << endl;
 		}
 		else {
-			//print command for now
-			//TODO: actually send data to client
+			string command = cbuff[0];
 
-			if(cbuff[0].compare("exit")) {
-				pthread_exit(0);
+			if(command.compare("exit")) {
+				command_exit();
 			}
-
-			cout << cbuff[0] << endl;
+			else if(command.compare("run")) {
+				command_run(cbuff);
+			}
+			else if(command.compare("list")) {
+				command_list(cbuff);
+			}
+			else if(command.compare("upload")) {
+				command_upload(cbuff);
+			}
+			else if(command.compare("run")) {
+				command_run(cbuff);
+			}
+			else if(command.compare("compile")) {
+				command_compile(cbuff);
+			}
+			else {
+				cout << "Unknown Command" << endl;
+			}
 		}
 	}
 	pthread_exit(0);

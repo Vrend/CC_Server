@@ -17,18 +17,20 @@ You should have received a copy of the GNU General Public License
 long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "dependencies.h"
-#include "structs.h"
 #include "constants.h"
-#include "local_functions.h"
-#include "command_functions.h"
 
-// Functions
+// Functions begin
 
-void* initialize_client_handler(void* arg);
+void command_help(string* args);
 
-void* initialize_terminal(void* arg);
+void command_run(string* args);
 
-void run_command(string command, string* command_args);
+void command_list(string* args);
 
-void* handle_client(void* arg);
+void command_upload(string* args);
+
+void command_compile(string* args);
+
+void command_exit();
+
+// Functions ends
