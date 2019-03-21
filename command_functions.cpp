@@ -28,19 +28,19 @@ void command_help(string* args) {
 
 	string comm = args[1];
 
-	if(comm.compare("run")) {
+	if(comm.compare("run") == 0) {
 		cout << "Runs a Program\nUSAGE: run [PROGRAM]" << endl;
 	}
-	else if(comm.compare("upload")) {
+	else if(comm.compare("upload") == 0) {
 		cout << "Uploads a Program to the CC_Server\nUSAGE: upload [FILE]" << endl;
 	}
-	else if(comm.compare("list")) {
+	else if(comm.compare("list") == 0) {
 		cout << "Lists all connected clients\nUSAGE: list (OS)" << endl;
 	}
-	else if(comm.compare("compile")) {
+	else if(comm.compare("compile") == 0) {
 		cout << "Compiles a Client\nUSAGE: compile (flags)" << endl;
 	}
-	else if(comm.compare("exit")) {
+	else if(comm.compare("exit") == 0) {
 		cout << "Exits server and closes all client connections\nUSAGE: exit" << endl;
 	}
 	else {

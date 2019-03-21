@@ -28,6 +28,8 @@ int num_clients = 0;
 //Array of clients
 client clients[MAX_CLIENTS];
 
+bool running;
+
 /* Creates 3 threads, the command handler which waits for input from terminal and sends command to
 ** clients, terminal thread which waits for input and sends command to command handler thread, and
 ** server thread which waits for connections, and creates a client thread
@@ -102,7 +104,9 @@ void* initialize_client_handler(void* arg) {
 	free(arg);
 	sia = NULL;
 
-	cout << "Starting Server on Port " << port << "With ip " << remote_ip << endl;
+	running = true;
+
+	cout << "Starting Server on Port " << port << " With ip " << remote_ip << endl;
 
 	//Generally address struct and size
 	struct sockaddr_in address, client_address;
@@ -119,6 +123,9 @@ void* initialize_client_handler(void* arg) {
 		free(port);
 		pthread_exit(0);
 	}
+
+	int flags = fcntl(master_socket, F_GETFL);
+	fcntl(master_socket, F_SETFL, flags | O_NONBLOCK);
 
 	//address struct initialization
 	address.sin_family = AF_INET;
@@ -149,12 +156,15 @@ void* initialize_client_handler(void* arg) {
 
 	cout << "Waiting for connections..." << endl;
 
-	while(true) {
+	signal(SIGUSR1, handle_exit);
+
+	while(running) {
 		//new client connection
+		sleep(1);
 		int new_client = accept(master_socket, (struct sockaddr*) &client_address, (socklen_t*) &client_size);
 
 		if(new_client < 0) {
-			cout << "Failed to Acquire Client" << endl;
+			//cout << "Failed to Acquire Client" << endl;
 			continue;
 		}
 
@@ -230,7 +240,6 @@ void* initialize_terminal(void* arg) {
 		string command_args[20];
 		tokenize(input, command_args);
 		if(check_command(command)) {
-			//run the actual command
 			run_command(command, command_args);
 		}
 		else {
@@ -242,17 +251,41 @@ void* initialize_terminal(void* arg) {
 //TODO: Send command via pipe to client
 void run_command(string command, string* command_args) {
 	pthread_mutex_lock(&lock);
-	for(int i = 0; i < MAX_CLIENTS; i++) {
-			//for each client thread, send it the command via its write pipe
-			if(clients[i].active) {
-					write(clients[i].client_write, command_args, sizeof(command_args));
-			}
-	}
-	pthread_mutex_unlock(&lock);
-
 	if(command.compare("exit") == 0) {
+		for(int i = 0; i < MAX_CLIENTS; i++) {
+				//for each client thread, send it the command via its write pipe
+				if(clients[i].active) {
+						write(clients[i].client_write, command_args, sizeof(command_args));
+				}
+		}
+		kill(getpid(), SIGUSR1);
 		pthread_exit(0);
 	}
+	else if(command.compare("run") == 0) {
+		cout << "Running " << command_args[1] << "...." << endl;
+		for(int i = 0; i < MAX_CLIENTS; i++) {
+				//for each client thread, send it the command via its write pipe
+				if(clients[i].active) {
+						write(clients[i].client_write, command_args, sizeof(command_args));
+				}
+		}
+	}
+	else if(command.compare("list") == 0) {
+		command_list(command_args);
+	}
+	else if(command.compare("upload") == 0) {
+		command_upload(command_args);
+	}
+	else if(command.compare("compile") == 0) {
+		command_compile(command_args);
+	}
+	else if(command.compare("help") == 0) {
+		command_help(command_args);
+	}
+	else {
+		cout << "Unknown Command" << endl;
+	}
+	pthread_mutex_unlock(&lock);
 }
 
 //Client thread runs this
@@ -271,28 +304,10 @@ void* handle_client(void* arg) {
 		}
 		else {
 			string command = cbuff[0];
-
 			if(command.compare("exit")) {
-				command_exit(connection);
+				pthread_exit(0);
 			}
-			else if(command.compare("run")) {
-				command_run(cbuff, connection);
-			}
-			else if(command.compare("list")) {
-				command_list(cbuff);
-			}
-			else if(command.compare("upload")) {
-				command_upload(cbuff);
-			}
-			else if(command.compare("compile")) {
-				command_compile(cbuff);
-			}
-			else if(command.compare("help")) {
-				command_help(cbuff);
-			}
-			else {
-				cout << "Unknown Command" << endl;
-			}
+			cout << command << endl;
 		}
 	}
 	pthread_exit(0);
@@ -304,4 +319,9 @@ int find_empty_client_index() {
 			return i;
 		}
 	}
+}
+
+void handle_exit(int sig) {
+	cout << "Shutting down server..." << endl;
+	running = false;
 }

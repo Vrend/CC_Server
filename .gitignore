@@ -1,3 +1,3 @@
-# Generally we're going to ignore the object .0 files and the executable server file
+# Generally we're going to ignore the object .o files and the executable server file
 server
 *.o

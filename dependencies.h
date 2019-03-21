@@ -30,6 +30,9 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 #include <pthread.h>
 #include <string>
 #include <arpa/inet.h>
+#include <signal.h>
+#include <errno.h>
+#include <fcntl.h>
 
 //Dependencies end here
 

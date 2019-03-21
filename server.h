@@ -33,4 +33,6 @@ void run_command(string command, string* command_args);
 
 void* handle_client(void* arg);
 
+void handle_exit(int sig);
+
 int find_empty_client_index();
