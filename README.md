@@ -1,4 +1,4 @@
-# Remote Administration Tool - Server
+# Remote Administration Tool - Client & Server
 
 This is a work in progress
 
@@ -10,6 +10,7 @@ Simply run **make** to compile the executable called 'server'
 
 Run **make clean** to clear object files and the executable
 
+Run **make** in the client directory to compile the client
 
 ## License
 
