@@ -25,6 +25,7 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 #include <unistd.h>
 #include <stdio.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <iostream>
 #include <pthread.h>
 #include <string>

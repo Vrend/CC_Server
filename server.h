@@ -32,3 +32,5 @@ void* initialize_terminal(void* arg);
 void run_command(string command, string* command_args);
 
 void* handle_client(void* arg);
+
+int find_empty_client_index();

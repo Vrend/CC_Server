@@ -40,6 +40,7 @@ typedef struct client_args {
 typedef struct client {
 	pthread_t client;
 	int client_write;
+	bool active = false;
 } client;
 
 #endif

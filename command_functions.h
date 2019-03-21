@@ -23,7 +23,7 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 void command_help(string* args);
 
-void command_run(string* args);
+void command_run(string* args, int fd);
 
 void command_list(string* args);
 
@@ -31,6 +31,6 @@ void command_upload(string* args);
 
 void command_compile(string* args);
 
-void command_exit();
+void command_exit(int fd);
 
 // Functions ends

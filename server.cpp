@@ -105,9 +105,10 @@ void* initialize_client_handler(void* arg) {
 	cout << "Starting Server on Port " << port << "With ip " << remote_ip << endl;
 
 	//Generally address struct and size
-	struct sockaddr_in address;
+	struct sockaddr_in address, client_address;
 
 	int asize = sizeof(address);
+	int client_size;
 
 	//general socket used to create client sockets
 	int master_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -144,14 +145,30 @@ void* initialize_client_handler(void* arg) {
 		pthread_exit(0);
 	}
 
+	client_size = sizeof(client_address);
+
 	cout << "Waiting for connections..." << endl;
 
 	while(true) {
 		//new client connection
-		int new_client = accept(master_socket, (struct sockaddr*) &address, (socklen_t*) &asize);
+		int new_client = accept(master_socket, (struct sockaddr*) &client_address, (socklen_t*) &client_size);
 
 		if(new_client < 0) {
 			cout << "Failed to Acquire Client" << endl;
+			continue;
+		}
+
+		int optval = 1;
+		int optsize = sizeof(optval);
+		int set_sock_opt = setsockopt(new_client, SOL_SOCKET, SO_KEEPALIVE, &optval, optsize);
+		int optval2 = 300;
+		int optsize2 = sizeof(optval2);
+		int set_keep_alive_time = setsockopt(new_client, SOL_TCP, TCP_KEEPIDLE, &optval2, optsize2);
+
+		if(set_sock_opt < 0 || set_keep_alive_time < 0) {
+			cout << "Failed to set KEEP_ALIVE for client socket" << endl;
+			close(new_client);
+			continue;
 		}
 
 		//can't have too many connections
@@ -175,15 +192,19 @@ void* initialize_client_handler(void* arg) {
 			ca->client_read = p[0];
 
 			//create client thread
-			int res = pthread_create(&(clients[num_clients].client), NULL, handle_client, (void*) ca);
+
+			int index = find_empty_client_index();
+
+			int res = pthread_create(&(clients[index].client), NULL, handle_client, (void*) ca);
 			if(res < 0) {
 				cout << "Failed to Create Thread" << endl;
 			}
 			else {
 				cout << "Client Acquired" << endl;
 				//add the pipe write to the clients and detach client thread
-				clients[num_clients].client_write = p[1];
-				pthread_detach(clients[num_clients].client);
+				clients[index].client_write = p[1];
+				clients[index].active = true;
+				pthread_detach(clients[index].client);
 				num_clients++;
 			}
 		}
@@ -218,12 +239,14 @@ void* initialize_terminal(void* arg) {
 	}
 }
 
-//TODO: Send command via pipe to command handler
+//TODO: Send command via pipe to client
 void run_command(string command, string* command_args) {
 	pthread_mutex_lock(&lock);
-	for(int i = 0; i < num_clients; i++) {
+	for(int i = 0; i < MAX_CLIENTS; i++) {
 			//for each client thread, send it the command via its write pipe
-			write(clients[i].client_write, command_args, sizeof(command_args));
+			if(clients[i].active) {
+					write(clients[i].client_write, command_args, sizeof(command_args));
+			}
 	}
 	pthread_mutex_unlock(&lock);
 
@@ -250,10 +273,10 @@ void* handle_client(void* arg) {
 			string command = cbuff[0];
 
 			if(command.compare("exit")) {
-				command_exit();
+				command_exit(connection);
 			}
 			else if(command.compare("run")) {
-				command_run(cbuff);
+				command_run(cbuff, connection);
 			}
 			else if(command.compare("list")) {
 				command_list(cbuff);
@@ -261,11 +284,11 @@ void* handle_client(void* arg) {
 			else if(command.compare("upload")) {
 				command_upload(cbuff);
 			}
-			else if(command.compare("run")) {
-				command_run(cbuff);
-			}
 			else if(command.compare("compile")) {
 				command_compile(cbuff);
+			}
+			else if(command.compare("help")) {
+				command_help(cbuff);
 			}
 			else {
 				cout << "Unknown Command" << endl;
@@ -273,4 +296,12 @@ void* handle_client(void* arg) {
 		}
 	}
 	pthread_exit(0);
+}
+
+int find_empty_client_index() {
+	for(int i = 0; i < MAX_CLIENTS; i++) {
+		if(!clients[i].active) {
+			return i;
+		}
+	}
 }

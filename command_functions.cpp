@@ -19,7 +19,8 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "command_functions.h"
 
-void command_exit() {
+void command_exit(int fd) {
+	close(fd);
 	pthread_exit(0);
 }
 
@@ -47,7 +48,7 @@ void command_help(string* args) {
 	}
 }
 
-void command_run(string* args) {
+void command_run(string* args, int fd) {
 	//TODO
 }
 
