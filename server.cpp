@@ -164,7 +164,6 @@ void* initialize_client_handler(void* arg) {
 		int new_client = accept(master_socket, (struct sockaddr*) &client_address, (socklen_t*) &client_size);
 
 		if(new_client < 0) {
-			//cout << "Failed to Acquire Client" << endl;
 			continue;
 		}
 

@@ -19,6 +19,9 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 // Dependencies go here
 
+#ifndef DEPENDENCIES_H
+#define DEPENDENCIES_H
+
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,6 +36,8 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
+
+#endif
 
 //Dependencies end here
 
