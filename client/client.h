@@ -19,7 +19,7 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "client_dependencies.h"
 
-#define PORT 16000
+//#define PORT 16001
 
 const char* remote_ip = "127.0.0.1";
 

@@ -213,7 +213,7 @@ void* initialize_client_handler(void* arg) {
 				//add the pipe write to the clients and detach client thread
 				clients[index].client_write = p[1];
 				clients[index].active = true;
-				pthread_detach(clients[index].client);
+				int dres = pthread_detach(clients[index].client);
 				num_clients++;
 			}
 		}
@@ -241,6 +241,9 @@ void* initialize_terminal(void* arg) {
 		if(check_command(command)) {
 			run_command(command, command_args);
 		}
+		else if(command.compare(" ")) {
+			continue;
+		}
 		else {
 			cout << "Invalid Command" << endl;
 		}
@@ -254,7 +257,8 @@ void run_command(string command, string* command_args) {
 		for(int i = 0; i < MAX_CLIENTS; i++) {
 				//for each client thread, send it the command via its write pipe
 				if(clients[i].active) {
-						write(clients[i].client_write, command_args, sizeof(command_args));
+					cout << "exiting client with ID " << i << "..." << endl;
+					write(clients[i].client_write, command_args, sizeof(command_args));
 				}
 		}
 		kill(getpid(), SIGUSR1);
@@ -263,10 +267,10 @@ void run_command(string command, string* command_args) {
 	else if(command.compare("run") == 0) {
 		cout << "Running " << command_args[1] << "...." << endl;
 		for(int i = 0; i < MAX_CLIENTS; i++) {
-				//for each client thread, send it the command via its write pipe
-				if(clients[i].active) {
-						write(clients[i].client_write, command_args, sizeof(command_args));
-				}
+			//for each client thread, send it the command via its write pipe
+			if(clients[i].active) {
+					write(clients[i].client_write, command_args, sizeof(command_args));
+			}
 		}
 	}
 	else if(command.compare("list") == 0) {

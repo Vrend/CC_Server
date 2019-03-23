@@ -1,4 +1,5 @@
 # Generally we're going to ignore the object .o files and the executable client and server files
 server
-client
+client/*.o
+client/client
 *.o

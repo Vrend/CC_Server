@@ -21,7 +21,19 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 bool running = true;
 
-int main() {
+int main(int argc, char** argv) {
+
+	if(argc != 2) {
+		cout << "Invalid arguments" << endl;
+		return 1;
+	}
+
+	int port = atoi(argv[1]);
+
+	if(port <= 0) {
+		cout << "Invalid arguments" << endl;
+		return 1;
+	}
 
 	signal(SIGINT, signal_handler);
 	int fd;
@@ -40,7 +52,7 @@ int main() {
 	memset(&addr, '0', sizeof(addr));
 
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(PORT);
+	addr.sin_port = htons(port);
 
 	if(inet_pton(AF_INET, remote_ip, &addr.sin_addr) <= 0) {
 		cout << "Bad address" << endl;
@@ -61,7 +73,7 @@ int main() {
 	}
 
 	close(fd);
-	cout << "closing client..." << endl;
+	cout << "\nclosing client..." << endl;
 	return 0;
 }
 
