@@ -62,9 +62,9 @@ void tokenize(string input, string* result) {
 }
 
 //Check if command is a valid command
-bool check_command(string command) {
+bool check_command(const char* command) {
 	for(int i = 0; i < COMMAND_NUM; i++) {
-		if(command.compare(commands[i]) == 0) {
+		if(strcmp(command, commands[i].c_str()) == 0) {
 			return true;
 		}
 	}

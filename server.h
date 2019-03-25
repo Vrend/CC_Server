@@ -29,10 +29,12 @@ void* initialize_client_handler(void* arg);
 
 void* initialize_terminal(void* arg);
 
-void run_command(string command, string* command_args);
+void run_command(const char* command, char* command_args);
 
 void* handle_client(void* arg);
 
 void handle_exit(int sig);
+
+void handle_sigint(int sig);
 
 int find_empty_client_index();

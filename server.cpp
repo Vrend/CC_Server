@@ -17,6 +17,10 @@ You should have received a copy of the GNU General Public License
 long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
+//Need to fix the issue with the memory of the strings for the command handler
+
+
 #include "server.h"
 
 //Synchronization
@@ -29,6 +33,8 @@ int num_clients = 0;
 client clients[MAX_CLIENTS];
 
 bool running;
+
+bool force_run;
 
 /* Creates 3 threads, the command handler which waits for input from terminal and sends command to
 ** clients, terminal thread which waits for input and sends command to command handler thread, and
@@ -77,7 +83,6 @@ int main(int argc, char** argv) {
 	strcpy(args->arg1, argv[1]);
 	strcpy(args->arg2, argv[2]);
 
-
 	//creates all three threads
 	pthread_create(&client_handler, NULL, initialize_client_handler, (void*) args);
 	pthread_create(&terminal, NULL, initialize_terminal, NULL);
@@ -105,6 +110,7 @@ void* initialize_client_handler(void* arg) {
 	sia = NULL;
 
 	running = true;
+	force_run = false;
 
 	cout << "Starting Server on Port " << port << " With ip " << remote_ip << endl;
 
@@ -157,9 +163,17 @@ void* initialize_client_handler(void* arg) {
 	cout << "Waiting for connections..." << endl;
 
 	signal(SIGUSR1, handle_exit);
+	signal(SIGINT, handle_sigint);
 
 	while(running) {
 		//new client connection
+		if(force_run) {
+			close(master_socket);
+			free(remote_ip);
+			free(port);
+			exit(1);
+		}
+
 		sleep(1);
 		int new_client = accept(master_socket, (struct sockaddr*) &client_address, (socklen_t*) &client_size);
 
@@ -235,25 +249,26 @@ void* initialize_terminal(void* arg) {
 		string input;
 		cout << ">> ";
 		getline(cin, input);
-		string command = input.substr(0, input.find(" "));
-		string command_args[20];
-		tokenize(input, command_args);
+		const char* command = (input.substr(0, input.find(" "))).c_str();
+		char* command_char = (char*) malloc(sizeof(input.c_str()));
+		strcpy(command_char, input.c_str());
 		if(check_command(command)) {
-			run_command(command, command_args);
+			run_command(command, command_char);
 		}
-		else if(command.compare(" ")) {
-			continue;
+		else if(strcmp(command, "") == 0) {
+			;
 		}
 		else {
 			cout << "Invalid Command" << endl;
 		}
+		free(command_char);
 	}
 }
 
 //TODO: Send command via pipe to client
-void run_command(string command, string* command_args) {
+void run_command(const char* command, char* command_args) {
 	pthread_mutex_lock(&lock);
-	if(command.compare("exit") == 0) {
+	if(strcmp(command, "exit") == 0) {
 		for(int i = 0; i < MAX_CLIENTS; i++) {
 				//for each client thread, send it the command via its write pipe
 				if(clients[i].active) {
@@ -262,10 +277,11 @@ void run_command(string command, string* command_args) {
 				}
 		}
 		kill(getpid(), SIGUSR1);
+		free(command_args);
 		pthread_exit(0);
 	}
-	else if(command.compare("run") == 0) {
-		cout << "Running " << command_args[1] << "...." << endl;
+	else if(strcmp(command, "run") == 0) {
+		//cout << "Running " << command_args[1] << "...." << endl;
 		for(int i = 0; i < MAX_CLIENTS; i++) {
 			//for each client thread, send it the command via its write pipe
 			if(clients[i].active) {
@@ -273,20 +289,25 @@ void run_command(string command, string* command_args) {
 			}
 		}
 	}
-	else if(command.compare("list") == 0) {
-		command_list(command_args);
-	}
-	else if(command.compare("upload") == 0) {
-		command_upload(command_args);
-	}
-	else if(command.compare("compile") == 0) {
-		command_compile(command_args);
-	}
-	else if(command.compare("help") == 0) {
-		command_help(command_args);
-	}
 	else {
-		cout << "Unknown Command" << endl;
+		string comarg[20];
+		tokenize(command_args, comarg);
+
+		if(strcmp(command, "list") == 0) {
+			command_list(comarg);
+		}
+		else if(strcmp(command, "upload") == 0) {
+			command_upload(comarg);
+		}
+		else if(strcmp(command, "compile") == 0) {
+			command_compile(comarg);
+		}
+		else if(strcmp(command, "help") == 0) {
+			command_help(comarg);
+		}
+		else {
+			cout << "Unknown Command" << endl;
+		}
 	}
 	pthread_mutex_unlock(&lock);
 }
@@ -300,13 +321,15 @@ void* handle_client(void* arg) {
 
 	//wait for pipe from command handler
 	while(true) {
-		string cbuff[20];
+		char* cbuff;
 		int res = read(cread, cbuff, sizeof(cbuff));
 		if(res < 0) {
-			cout << "Client pipe read error" << endl;
+			//cout << "Client pipe read error" << endl;
 		}
 		else {
-			string command = cbuff[0];
+			string tokens[20];
+			tokenize(cbuff, tokens);
+			string command = tokens[0];
 			if(command.compare("exit")) {
 				pthread_exit(0);
 			}
@@ -322,9 +345,15 @@ int find_empty_client_index() {
 			return i;
 		}
 	}
+	return -1;
 }
 
 void handle_exit(int sig) {
 	cout << "Shutting down server..." << endl;
 	running = false;
+}
+
+void handle_sigint(int sig) {
+	cout << "Force shutting down server..." << endl;
+	force_run = true;
 }

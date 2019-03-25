@@ -28,7 +28,7 @@ bool valid_params(const char* ip, char* port);
 
 void print_usage();
 
-bool check_command(string command);
+bool check_command(const char* command);
 
 void print_license();
 

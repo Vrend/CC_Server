@@ -19,7 +19,8 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "client.h"
 
-bool running = true;
+bool running;
+int port;
 
 int main(int argc, char** argv) {
 
@@ -28,7 +29,9 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	int port = atoi(argv[1]);
+	port = atoi(argv[1]);
+
+	running = true;
 
 	if(port <= 0) {
 		cout << "Invalid arguments" << endl;
@@ -36,6 +39,31 @@ int main(int argc, char** argv) {
 	}
 
 	signal(SIGINT, signal_handler);
+
+	int i = 0;
+
+	int res;
+
+	while(i < 5) {
+		res = fork();
+		if(res == 0) {
+			run_client();
+			break;
+		}
+		else {
+			i++;
+		}
+	}
+
+	return 0;
+}
+
+void signal_handler(int sig) {
+	running = false;
+}
+
+int run_client() {
+
 	int fd;
 
 	struct sockaddr_in addr;
@@ -68,6 +96,8 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	cout << "Successfully connected...." << endl;
+
 	while(running) {
 		;
 	}
@@ -75,8 +105,4 @@ int main(int argc, char** argv) {
 	close(fd);
 	cout << "\nclosing client..." << endl;
 	return 0;
-}
-
-void signal_handler(int sig) {
-	running = false;
 }

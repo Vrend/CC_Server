@@ -24,3 +24,5 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 const char* remote_ip = "127.0.0.1";
 
 void signal_handler(int sig);
+
+int run_client();
