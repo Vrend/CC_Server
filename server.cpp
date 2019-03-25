@@ -18,9 +18,6 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-//Need to fix the issue with the memory of the strings for the command handler
-
-
 #include "server.h"
 
 //Synchronization
@@ -90,10 +87,17 @@ int main(int argc, char** argv) {
 	//Once all threads exit, game over
 	pthread_join(terminal, NULL);
 	pthread_join(client_handler, NULL);
+	// pthread_mutex_lock(&lock);
+	// for(int i = 0; i < MAX_CLIENTS; i++) {
+	// 	if(clients[i].active) {
+	// 		pthread_join(clients[i].client, NULL);
+	// 	}
+	// }
+	// pthread_mutex_unlock(&lock);
 
 	//Properly destroy mutex and return
 	pthread_mutex_destroy(&lock);
-	return 0;
+	pthread_exit(0);
 }
 
 //Handles gathering clients
@@ -219,15 +223,15 @@ void* initialize_client_handler(void* arg) {
 			int index = find_empty_client_index();
 
 			int res = pthread_create(&(clients[index].client), NULL, handle_client, (void*) ca);
+
 			if(res < 0) {
 				cout << "Failed to Create Thread" << endl;
 			}
 			else {
 				cout << "Client Acquired" << endl;
-				//add the pipe write to the clients and detach client thread
+				//add the pipe write to the clients
 				clients[index].client_write = p[1];
 				clients[index].active = true;
-				int dres = pthread_detach(clients[index].client);
 				num_clients++;
 			}
 		}
@@ -250,7 +254,7 @@ void* initialize_terminal(void* arg) {
 		cout << ">> ";
 		getline(cin, input);
 		const char* command = (input.substr(0, input.find(" "))).c_str();
-		char* command_char = (char*) malloc(sizeof(input.c_str()));
+		char* command_char = (char*) malloc(1024);
 		strcpy(command_char, input.c_str());
 		if(check_command(command)) {
 			run_command(command, command_char);
@@ -272,8 +276,8 @@ void run_command(const char* command, char* command_args) {
 		for(int i = 0; i < MAX_CLIENTS; i++) {
 				//for each client thread, send it the command via its write pipe
 				if(clients[i].active) {
-					cout << "exiting client with ID " << i << "..." << endl;
-					write(clients[i].client_write, command_args, sizeof(command_args));
+					//cout << "exiting client with ID " << i << "..." << endl;
+					write(clients[i].client_write, command_args, 1024);
 				}
 		}
 		kill(getpid(), SIGUSR1);
@@ -285,7 +289,7 @@ void run_command(const char* command, char* command_args) {
 		for(int i = 0; i < MAX_CLIENTS; i++) {
 			//for each client thread, send it the command via its write pipe
 			if(clients[i].active) {
-					write(clients[i].client_write, command_args, sizeof(command_args));
+					write(clients[i].client_write, command_args, 1024);
 			}
 		}
 	}
@@ -315,14 +319,15 @@ void run_command(const char* command, char* command_args) {
 //Client thread runs this
 void* handle_client(void* arg) {
 	//Arguments grabbed and heap element freed
+	pthread_detach(pthread_self());
 	int connection = ((client_args*) arg)->client_fd;
 	int cread = ((client_args*) arg)->client_read;
 	free(arg);
 
 	//wait for pipe from command handler
 	while(true) {
-		char* cbuff;
-		int res = read(cread, cbuff, sizeof(cbuff));
+		char cbuff[1024];
+		int res = read(cread, cbuff, 1024);
 		if(res < 0) {
 			//cout << "Client pipe read error" << endl;
 		}
@@ -330,7 +335,9 @@ void* handle_client(void* arg) {
 			string tokens[20];
 			tokenize(cbuff, tokens);
 			string command = tokens[0];
-			if(command.compare("exit")) {
+			if(command.compare("exit\n") || command.compare("exit")) {
+				close(cread);
+				close(connection);
 				pthread_exit(0);
 			}
 			cout << command << endl;
@@ -339,6 +346,9 @@ void* handle_client(void* arg) {
 	pthread_exit(0);
 }
 
+/*
+Function needs to be called inside of the mutex lock
+*/
 int find_empty_client_index() {
 	for(int i = 0; i < MAX_CLIENTS; i++) {
 		if(!clients[i].active) {

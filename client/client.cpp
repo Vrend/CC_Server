@@ -44,17 +44,19 @@ int main(int argc, char** argv) {
 
 	int res;
 
-	while(i < 5) {
+	while(i < 15) {
 		res = fork();
 		if(res == 0) {
 			run_client();
-			break;
+			exit(0);
 		}
 		else {
 			i++;
 		}
 	}
 
+	while(running);
+	cout << "closing clients" << endl;
 	return 0;
 }
 
@@ -103,6 +105,5 @@ int run_client() {
 	}
 
 	close(fd);
-	cout << "\nclosing client..." << endl;
 	return 0;
 }
