@@ -149,7 +149,7 @@ void* initialize_client_handler(void* arg) {
 		cout << "Failed to Bind" << endl;
 		free(remote_ip);
 		free(port);
-		pthread_exit(0);
+		exit(1);
 	}
 
 	//listen for connections
@@ -159,7 +159,7 @@ void* initialize_client_handler(void* arg) {
 		cout << "Failed to Listen" << endl;
 		free(remote_ip);
 		free(port);
-		pthread_exit(0);
+		exit(1);
 	}
 
 	client_size = sizeof(client_address);
@@ -255,6 +255,7 @@ void* initialize_terminal(void* arg) {
 		getline(cin, input);
 		const char* command = (input.substr(0, input.find(" "))).c_str();
 		char* command_char = (char*) malloc(1024);
+		memset(command_char, '\0', 1024);
 		strcpy(command_char, input.c_str());
 		if(check_command(command)) {
 			run_command(command, command_char);
