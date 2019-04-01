@@ -49,7 +49,19 @@ void command_help(string* args) {
 }
 
 void command_run(string* args, int fd) {
-	//TODO
+
+	int num = sizeof(args)/sizeof(args[0]);
+	char* arg_conv[num];
+	for(int i = 0; i < num; i++) {
+		arg_conv[i] = args[i];
+	}
+	int ret = fork();
+	if(ret == 0) {
+		const char* prog = strcat("programs/", arg_conv[0]);
+		execv(prog, arg_conv);
+		cout << "Error running program" << endl;
+		exit(-1);
+	}
 }
 
 void command_upload(string* args) {
