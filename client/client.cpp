@@ -21,6 +21,7 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 bool running;
 int port;
+int res;
 
 int main(int argc, char** argv) {
 
@@ -41,8 +42,6 @@ int main(int argc, char** argv) {
 	signal(SIGINT, signal_handler);
 
 	int i = 0;
-
-	int res;
 
 	while(i < 15) {
 		res = fork();
@@ -90,18 +89,28 @@ int run_client() {
 		return 1;
 	}
 
-	int cres = connect(fd, (struct sockaddr*) &addr, sizeof(addr));
-
-	if(cres < 0) {
-		cout << "Connection failed...Terminating" << endl;
-		close(fd);
-		return 1;
-	}
-
-	cout << "Successfully connected...." << endl;
-
 	while(running) {
-		;
+		res = connect(fd, (struct sockaddr*) &addr, sizeof(addr));
+
+		if(res < 0) {
+			//cout << "Connection failed...Terminating" << endl;
+			sleep(60);
+			continue;
+		}
+
+		cout << "Successfully connected...." << endl;
+
+		bzero(buffer, 2048);
+		res = read(fd, buffer, 2047);
+		if(res < 0) {
+			cout << "Error reading from socket" << endl;
+		}
+		cout << buffer << endl;
+		bzero(buffer, 2048);
+		res = write(fd, buffer, 2047);
+		if(res < 0) {
+			cout << "Error writing to socket" << endl;
+		}
 	}
 
 	close(fd);

@@ -48,16 +48,26 @@ void command_help(string* args) {
 	}
 }
 
-void command_run(string* args, int fd) {
+/*
+@PARAMETERS:
+- args --> command line arguments (includes program)
+- fd --> file descriptor for client pthread_exit
 
+@RETURN: Nothing
+
+Runs comm
+
+*/
+
+void command_run(string* args, int fd) {
 	int num = sizeof(args)/sizeof(args[0]);
 	char* arg_conv[num];
 	for(int i = 0; i < num; i++) {
-		arg_conv[i] = args[i];
+		arg_conv[i] = const_cast<char*>(args[i].c_str());
 	}
 	int ret = fork();
 	if(ret == 0) {
-		const char* prog = strcat("programs/", arg_conv[0]);
+		char* prog = strcat(const_cast<char*>("programs/"), arg_conv[0]);
 		execv(prog, arg_conv);
 		cout << "Error running program" << endl;
 		exit(-1);
