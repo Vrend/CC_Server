@@ -17,13 +17,34 @@ You should have received a copy of the GNU General Public License
 long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "client_dependencies.h"
-#inlude "commands.h"
+#include "commands.h"
 
-//#define PORT 16001
+void command_run(string* args) {
+	int num = sizeof(args)/sizeof(args[0]);
+	char* arg_conv[num];
+	for(int i = 0; i < num; i++) {
+		arg_conv[i] = const_cast<char*>(args[i].c_str());
+	}
+	int ret = fork();
+	if(ret == 0) {
+		char* prog = strcat(const_cast<char*>("programs/"), arg_conv[0]);
+		execv(prog, arg_conv);
+		cout << "Error running program" << endl;
+		exit(-1);
+	}
+}
 
-const char* remote_ip = "127.0.0.1";
+//Split user input into the options called tokens
+void tokenize(char* input, string* result) {
+	char* token;
+	int i = 0;
 
-void signal_handler(int sig);
+	token = strtok(cinput, " ");
 
-int run_client();
+	while(token != NULL) {
+		result[i] = string(token);
+		token = strtok(NULL, " ");
+		i++;
+	}
+	free(cinput);
+}

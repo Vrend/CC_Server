@@ -254,19 +254,19 @@ void* initialize_terminal(void* arg) {
 		cout << ">> ";
 		getline(cin, input);
 		const char* command = (input.substr(0, input.find(" "))).c_str();
-		char* command_char = (char*) malloc(1024);
-		memset(command_char, '\0', 1024);
-		strcpy(command_char, input.c_str());
 		if(check_command(command)) {
+			char* command_char = (char*) malloc(1024);
+			memset(command_char, '\0', 1024);
+			strcpy(command_char, input.c_str());
 			run_command(command, command_char);
+			free(command_char);
 		}
 		else if(strcmp(command, "") == 0) {
-			;
+			continue;
 		}
 		else {
 			cout << "Invalid Command" << endl;
 		}
-		free(command_char);
 	}
 }
 
@@ -338,10 +338,12 @@ void* handle_client(void* arg) {
 			string command = tokens[0];
 			if(command.compare("exit\n") || command.compare("exit")) {
 				close(cread);
-				close(connection);
-				pthread_exit(0);
+				command_exit(connection);
 			}
-			cout << command << endl;
+			else {
+				write(connection, cbuff, 1024);
+			}
+			//cout << command << endl;
 		}
 	}
 	pthread_exit(0);

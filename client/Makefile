@@ -22,9 +22,9 @@ CC = g++
 
 CFLAGS = -g -Wall
 
-DEPS = client.h client_dependencies.h
+DEPS = client.h client_dependencies.h commands.h
 
-OBJ = client.o
+OBJ = client.o commands.o
 
 all: $(TARGET)
 

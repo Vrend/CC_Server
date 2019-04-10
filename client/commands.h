@@ -18,12 +18,7 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "client_dependencies.h"
-#inlude "commands.h"
 
-//#define PORT 16001
+void command_run(string* args);
 
-const char* remote_ip = "127.0.0.1";
-
-void signal_handler(int sig);
-
-int run_client();
+void tokenize(char* input, string* result);

