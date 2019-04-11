@@ -3,3 +3,7 @@ server
 client/*.o
 client/client
 *.o
+programs/*
+!programs/.gitkeep
+client/programs/*
+!client/programs/.gitkeep

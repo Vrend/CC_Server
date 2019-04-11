@@ -28,7 +28,7 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 #define MAX_CLIENTS 1000
 
-#define VERSION 0.1
+#define VERSION 0.2
 
 const string commands[] = {"help", "run", "exit", "list", "upload", "compile"};
 

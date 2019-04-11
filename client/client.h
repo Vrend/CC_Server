@@ -18,7 +18,7 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "client_dependencies.h"
-#inlude "commands.h"
+#include "commands.h"
 
 //#define PORT 16001
 

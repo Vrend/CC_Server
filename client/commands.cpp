@@ -39,12 +39,11 @@ void tokenize(char* input, string* result) {
 	char* token;
 	int i = 0;
 
-	token = strtok(cinput, " ");
-
+	token = strtok(input, " ");
+	
 	while(token != NULL) {
 		result[i] = string(token);
 		token = strtok(NULL, " ");
 		i++;
 	}
-	free(cinput);
 }

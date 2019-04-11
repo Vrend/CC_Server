@@ -342,6 +342,9 @@ void* handle_client(void* arg) {
 			}
 			else {
 				write(connection, cbuff, 1024);
+				bzero(cbuff, 1024);
+				read(connection, cbuff, 1024);
+				cout << cbuff << endl;
 			}
 			//cout << command << endl;
 		}

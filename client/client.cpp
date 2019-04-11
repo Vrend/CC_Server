@@ -20,21 +20,23 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 #include "client.h"
 
 bool running;
-int port;
+int port, client_count;
 int res;
 
 int main(int argc, char** argv) {
 
-	if(argc != 2) {
+	if(argc != 3) {
 		cout << "Invalid arguments" << endl;
 		return 1;
 	}
 
 	port = atoi(argv[1]);
 
+	client_count = atoi(argv[2]);
+
 	running = true;
 
-	if(port <= 0) {
+	if(port <= 0 || client_count < 0) {
 		cout << "Invalid arguments" << endl;
 		return 1;
 	}
@@ -43,14 +45,14 @@ int main(int argc, char** argv) {
 
 	int i = 0;
 
-	while(i < 15) {
+	while(client_count > 0) {
 		res = fork();
 		if(res == 0) {
 			run_client();
 			exit(0);
 		}
 		else {
-			i++;
+			client_count--;
 		}
 	}
 
@@ -93,8 +95,8 @@ int run_client() {
 		res = connect(fd, (struct sockaddr*) &addr, sizeof(addr));
 
 		if(res < 0) {
-			//cout << "Connection failed...Terminating" << endl;
-			sleep(60);
+			cout << "Connection failed...Terminating" << endl;
+			sleep(5);
 			continue;
 		}
 
@@ -111,13 +113,18 @@ int run_client() {
 		tokenize(buffer, tokens);
 
 		if(tokens[0].compare("run") == 0) {
-			run_command(tokens);
+			cout << "running program..." << endl;
+			command_run(tokens);
+		}
+		else if(tokens[0].compare("exit") == 0) {
+			running = false;
+			cout << "closing clients...." << endl;
 		}
 		else {
 			cout << buffer << endl;
 		}
 		bzero(buffer, 1024);
-		buffer = "Task completed...";
+		strcpy(buffer, "Task completed...");
 		res = write(fd, buffer, 1023);
 		if(res < 0) {
 			cout << "Error writing to socket" << endl;
