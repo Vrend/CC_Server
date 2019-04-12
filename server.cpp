@@ -336,7 +336,7 @@ void* handle_client(void* arg) {
 			string tokens[20];
 			tokenize(cbuff, tokens);
 			string command = tokens[0];
-			if(command.compare("exit\n") || command.compare("exit")) {
+			if(command.compare("exit\n") == 0 || command.compare("exit") == 0) {
 				close(cread);
 				command_exit(connection);
 			}

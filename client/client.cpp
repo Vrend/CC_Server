@@ -57,15 +57,17 @@ int main(int argc, char** argv) {
 	}
 
 	while(running);
-	cout << "closing clients" << endl;
+	cout << "\nclosing clients" << endl;
 	return 0;
 }
 
 void signal_handler(int sig) {
-	running = false;
+	exit(0);
 }
 
 int run_client() {
+
+	signal(SIGINT, signal_handler);
 
 	int fd;
 
@@ -73,7 +75,21 @@ int run_client() {
 
 	char buffer[1024];
 
+	reconnect:
 	fd = socket(AF_INET, SOCK_STREAM, 0);
+
+	int optval = 1;
+	int optsize = sizeof(optval);
+	int set_sock_opt = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optsize);
+	int optval2 = 300;
+	int optsize2 = sizeof(optval2);
+	int set_keep_alive_time = setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &optval2, optsize2);
+
+	if(set_sock_opt < 0 || set_keep_alive_time < 0) {
+		cout << "Failed to set KEEP_ALIVE for client socket" << endl;
+		close(fd);
+		return 1;
+	}
 
 	if(fd < 0) {
 		cout << "Error opening socket" << endl;
@@ -91,21 +107,25 @@ int run_client() {
 		return 1;
 	}
 
-	while(running) {
+	while(true) {
 		res = connect(fd, (struct sockaddr*) &addr, sizeof(addr));
-
 		if(res < 0) {
 			cout << "Connection failed...Terminating" << endl;
 			sleep(5);
-			continue;
 		}
+		else {
+			cout << "Successfully connected...." << endl;
+			break;
+		}
+	}
 
-		cout << "Successfully connected...." << endl;
-
+	while(running) {
 		bzero(buffer, 1024);
 		res = read(fd, buffer, 1023);
 		if(res < 0) {
 			cout << "Error reading from socket" << endl;
+			close(fd);
+			goto reconnect;
 		}
 
 		string tokens[20];
@@ -113,12 +133,10 @@ int run_client() {
 		tokenize(buffer, tokens);
 
 		if(tokens[0].compare("run") == 0) {
+			cout << tokens[0] << endl;
+			cout << tokens[1] << endl;
 			cout << "running program..." << endl;
 			command_run(tokens);
-		}
-		else if(tokens[0].compare("exit") == 0) {
-			running = false;
-			cout << "closing clients...." << endl;
 		}
 		else {
 			cout << buffer << endl;
@@ -128,7 +146,10 @@ int run_client() {
 		res = write(fd, buffer, 1023);
 		if(res < 0) {
 			cout << "Error writing to socket" << endl;
+			close(fd);
+			goto reconnect;
 		}
+
 	}
 
 	close(fd);

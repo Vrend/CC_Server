@@ -24,9 +24,11 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netinet/tcp.h>
 #include <string.h>
 #include <signal.h>
 #include <netinet/in.h>
+#include <errno.h>
 
 // Dependencies end here
 

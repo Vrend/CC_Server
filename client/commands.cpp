@@ -21,13 +21,20 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 void command_run(string* args) {
 	int num = sizeof(args)/sizeof(args[0]);
+	cout << num << endl;
 	char* arg_conv[num];
 	for(int i = 0; i < num; i++) {
+		cout << args[i] << endl;
 		arg_conv[i] = const_cast<char*>(args[i].c_str());
 	}
 	int ret = fork();
 	if(ret == 0) {
-		char* prog = strcat(const_cast<char*>("programs/"), arg_conv[0]);
+		char prog[1024];
+		bzero(prog, 1024);
+		strcpy(prog, "programs/");
+		cout << "part 1: " << prog << endl;
+		strcat(prog, arg_conv[1]);
+		cout << "part 2: " << prog << endl;
 		execv(prog, arg_conv);
 		cout << "Error running program" << endl;
 		exit(-1);
@@ -40,7 +47,7 @@ void tokenize(char* input, string* result) {
 	int i = 0;
 
 	token = strtok(input, " ");
-	
+
 	while(token != NULL) {
 		result[i] = string(token);
 		token = strtok(NULL, " ");
