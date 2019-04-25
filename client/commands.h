@@ -19,6 +19,6 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "client_dependencies.h"
 
-void command_run(string* args);
+void command_run(char* args);
 
-void tokenize(char* input, string* result);
+int tokenize(char* input, string* result);

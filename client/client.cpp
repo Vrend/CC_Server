@@ -122,6 +122,7 @@ int run_client() {
 	while(running) {
 		bzero(buffer, 1024);
 		res = read(fd, buffer, 1023);
+
 		if(res < 0) {
 			cout << "Error reading from socket" << endl;
 			close(fd);
@@ -130,13 +131,17 @@ int run_client() {
 
 		string tokens[20];
 
-		tokenize(buffer, tokens);
+		char test_buffer[1024];
+
+		strcpy(test_buffer, buffer);
+
+		tokenize(test_buffer, tokens);
 
 		if(tokens[0].compare("run") == 0) {
-			cout << tokens[0] << endl;
-			cout << tokens[1] << endl;
+			// cout << tokens[0] << endl;
+			// cout << tokens[1] << endl;
 			cout << "running program..." << endl;
-			command_run(tokens);
+			command_run(buffer);
 		}
 		else {
 			cout << buffer << endl;

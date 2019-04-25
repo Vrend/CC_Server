@@ -19,38 +19,35 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "commands.h"
 
-void command_run(string* args) {
-	int num = sizeof(args)/sizeof(args[0]);
-	cout << num << endl;
+void command_run(char* args) {
+	string tokens[20];
+	int num = tokenize(args, tokens);
 	char* arg_conv[num];
 	for(int i = 0; i < num; i++) {
-		cout << args[i] << endl;
-		arg_conv[i] = const_cast<char*>(args[i].c_str());
+		arg_conv[i] = const_cast<char*>(tokens[i].c_str());
 	}
+	arg_conv[num] = NULL;
 	int ret = fork();
 	if(ret == 0) {
 		char prog[1024];
 		bzero(prog, 1024);
 		strcpy(prog, "programs/");
-		cout << "part 1: " << prog << endl;
 		strcat(prog, arg_conv[1]);
-		cout << "part 2: " << prog << endl;
 		execv(prog, arg_conv);
-		cout << "Error running program" << endl;
+		cout << "Error running program, " << strerror(errno) << endl;
 		exit(-1);
 	}
 }
 
 //Split user input into the options called tokens
-void tokenize(char* input, string* result) {
+int tokenize(char* input, string* result) {
 	char* token;
 	int i = 0;
-
 	token = strtok(input, " ");
-
 	while(token != NULL) {
 		result[i] = string(token);
 		token = strtok(NULL, " ");
 		i++;
 	}
+	return i;
 }
