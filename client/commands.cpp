@@ -20,20 +20,65 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 #include "commands.h"
 
 void command_run(char* args) {
-	string tokens[20];
+	string tokens[30];
+
+	bool changed_pos = false;
 	int num = tokenize(args, tokens);
 	char* arg_conv[num];
 	for(int i = 0; i < num; i++) {
 		arg_conv[i] = const_cast<char*>(tokens[i].c_str());
 	}
 	arg_conv[num] = NULL;
+
+	char* program = strstr(arg_conv[1], ".py");
+
+	if(program != NULL) {
+		program = arg_conv[1];
+		arg_conv[0] = const_cast<char*>("python");
+		changed_pos = true;
+	}
+	else {
+		program = strstr(arg_conv[1], ".pl");
+		if(program != NULL) {
+			program = arg_conv[1];
+			arg_conv[0] = const_cast<char*>("perl");
+			changed_pos = true;
+		}
+		else {
+			program = strstr(arg_conv[1], ".rb");
+			if(program != NULL) {
+				program = arg_conv[1];
+				arg_conv[0] = const_cast<char*>("ruby");
+				changed_pos = true;
+			}
+		}
+	}
+
 	int ret = fork();
 	if(ret == 0) {
 		char prog[1024];
 		bzero(prog, 1024);
-		strcpy(prog, "programs/");
-		strcat(prog, arg_conv[1]);
-		execv(prog, arg_conv);
+
+		if(changed_pos) {
+			strcpy(prog, arg_conv[0]);
+			char new_prog[1024];
+			bzero(new_prog, 1024);
+			strcpy(new_prog, "programs/");
+			strcat(new_prog, arg_conv[1]);
+			arg_conv[1] = new_prog;
+		}
+		else {
+			strcpy(prog, "programs/");
+			strcat(prog, arg_conv[1]);
+			arg_conv[1] = prog;
+			for(int i = 0; i < num; i++) {
+				arg_conv[i] = arg_conv[i+1];
+			}
+		}
+
+		cout << arg_conv[0] << " " << arg_conv[1] << endl;
+
+		execvp(prog, arg_conv);
 		cout << "Error running program, " << strerror(errno) << endl;
 		exit(-1);
 	}
