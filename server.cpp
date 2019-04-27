@@ -31,8 +31,6 @@ client clients[MAX_CLIENTS];
 
 bool running;
 
-bool force_run;
-
 /* Creates 3 threads, the command handler which waits for input from terminal and sends command to
 ** clients, terminal thread which waits for input and sends command to command handler thread, and
 ** server thread which waits for connections, and creates a client thread
@@ -114,7 +112,6 @@ void* initialize_client_handler(void* arg) {
 	sia = NULL;
 
 	running = true;
-	force_run = false;
 
 	cout << "Starting Server on Port " << port << " With ip " << remote_ip << endl;
 
@@ -171,13 +168,6 @@ void* initialize_client_handler(void* arg) {
 
 	while(running) {
 		//new client connection
-		if(force_run) {
-			close(master_socket);
-			free(remote_ip);
-			free(port);
-			exit(1);
-		}
-
 		sleep(1);
 		int new_client = accept(master_socket, (struct sockaddr*) &client_address, (socklen_t*) &client_size);
 
@@ -283,6 +273,7 @@ void run_command(const char* command, char* command_args) {
 		}
 		kill(getpid(), SIGUSR1);
 		free(command_args);
+		pthread_mutex_unlock(&lock);
 		pthread_exit(0);
 	}
 	else if(strcmp(command, "run") == 0) {
@@ -371,5 +362,6 @@ void handle_exit(int sig) {
 
 void handle_sigint(int sig) {
 	cout << "Force shutting down server..." << endl;
-	force_run = true;
+	sleep(1);
+	exit(1);
 }
