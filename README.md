@@ -2,7 +2,7 @@
 
 This is a work in progress
 
-*I apologize for my barbaric mixture of C and C++ (I blame my OS professor)*
+*I apologize for my barbaric mixture of C and C++*
 
 ## How to Use
 
