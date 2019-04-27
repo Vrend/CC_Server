@@ -60,28 +60,42 @@ void command_run(char* args) {
 		bzero(prog, 1024);
 
 		if(changed_pos) {
+			cout << "running here" << endl;
 			strcpy(prog, arg_conv[0]);
 			char new_prog[1024];
 			bzero(new_prog, 1024);
 			strcpy(new_prog, "programs/");
 			strcat(new_prog, arg_conv[1]);
 			arg_conv[1] = new_prog;
+
+			cout << prog << endl;
+			cout << arg_conv[1] << endl;
 		}
 		else {
 			strcpy(prog, "programs/");
 			strcat(prog, arg_conv[1]);
-			arg_conv[1] = prog;
+
+			if(access(prog, F_OK) != -1) {
+				arg_conv[1] = prog;
+			}
+			else {
+				bzero(prog, 1024);
+				strcpy(prog, arg_conv[1]);
+			}
+
 			for(int i = 0; i < num; i++) {
 				arg_conv[i] = arg_conv[i+1];
 			}
 		}
 
-		cout << arg_conv[0] << " " << arg_conv[1] << endl;
-
 		execvp(prog, arg_conv);
 		cout << "Error running program, " << strerror(errno) << endl;
 		exit(-1);
 	}
+}
+
+void get_file(char* name, int fd) {
+	
 }
 
 //Split user input into the options called tokens

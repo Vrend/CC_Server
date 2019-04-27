@@ -27,7 +27,7 @@ void command_run(string* args, int fd);
 
 void command_list(string* args);
 
-void command_upload(string* args);
+void command_upload(string* args, int fd);
 
 void command_compile(string* args);
 

@@ -285,15 +285,20 @@ void run_command(const char* command, char* command_args) {
 			}
 		}
 	}
+	else if(strcmp(command, "upload") == 0) {
+		for(int i = 0; i < MAX_CLIENTS; i++) {
+			//for each client thread, send it the command via its write pipe
+			if(clients[i].active) {
+					write(clients[i].client_write, command_args, 1024);
+			}
+		}
+	}
 	else {
 		string comarg[20];
 		tokenize(command_args, comarg);
 
 		if(strcmp(command, "list") == 0) {
 			command_list(comarg);
-		}
-		else if(strcmp(command, "upload") == 0) {
-			command_upload(comarg);
 		}
 		else if(strcmp(command, "compile") == 0) {
 			command_compile(comarg);
@@ -330,6 +335,19 @@ void* handle_client(void* arg) {
 			if(command.compare("exit\n") == 0 || command.compare("exit") == 0) {
 				close(cread);
 				command_exit(connection);
+			}
+			else if(command.compare("upload") == 0) {
+				char prog[1024];
+				bzero(prog, 1024);
+				strcpy(prog, "programs/");
+				strcat(prog, tokens[1]);
+				if(access(prog, F_OK) != -1) {
+					write(connection, cbuff, 1024);
+					//TODO
+				}
+				else {
+					cout << "Invalid File: " << tokens[1] << endl;
+				}
 			}
 			else {
 				write(connection, cbuff, 1024);

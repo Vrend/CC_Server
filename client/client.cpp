@@ -143,6 +143,9 @@ int run_client() {
 			cout << "running program..." << endl;
 			command_run(buffer);
 		}
+		else if(tokens[0].compare("upload") == 0) {
+			get_file(const_cast<char*>(tokens[1].c_str()), fd);
+		}
 		else {
 			cout << buffer << endl;
 		}

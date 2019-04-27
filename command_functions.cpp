@@ -32,7 +32,7 @@ void command_help(string* args) {
 		cout << "Runs a Program\nUSAGE: run [PROGRAM]" << endl;
 	}
 	else if(comm.compare("upload") == 0) {
-		cout << "Uploads a Program to the CC_Server\nUSAGE: upload [FILE]" << endl;
+		cout << "Uploads a Program to all clients\nUSAGE: upload [FILE]" << endl;
 	}
 	else if(comm.compare("list") == 0) {
 		cout << "Lists all connected clients\nUSAGE: list (OS)" << endl;
@@ -48,34 +48,11 @@ void command_help(string* args) {
 	}
 }
 
-/*
-@PARAMETERS:
-- args --> command line arguments (includes program)
-- fd --> file descriptor for client pthread_exit
-
-@RETURN: Nothing
-
-Runs comm
-
-*/
-
-
 void command_run(string* args, int fd) {
-	// int num = sizeof(args)/sizeof(args[0]);
-	// char* arg_conv[num];
-	// for(int i = 0; i < num; i++) {
-	// 	arg_conv[i] = const_cast<char*>(args[i].c_str());
-	// }
-	// int ret = fork();
-	// if(ret == 0) {
-	// 	char* prog = strcat(const_cast<char*>("programs/"), arg_conv[0]);
-	// 	execv(prog, arg_conv);
-	// 	cout << "Error running program" << endl;
-	// 	exit(-1);
-	// }
+
 }
 
-void command_upload(string* args) {
+void command_upload(string* args, int fd) {
 	//TODO
 }
 

@@ -21,4 +21,6 @@ long with CC_Server.  If not, see <https://www.gnu.org/licenses/>.
 
 void command_run(char* args);
 
+void get_file(char* name, int fd);
+
 int tokenize(char* input, string* result);
