@@ -1,0 +1,9 @@
+# Generally we're going to ignore the object .o files and the executable client and server files
+server
+client/*.o
+client/client
+*.o
+programs/*
+!programs/.gitkeep
+client/programs/*
+!client/programs/.gitkeep
